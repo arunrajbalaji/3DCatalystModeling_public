@@ -18,13 +18,19 @@ This is a brief snapshot of parts of the code, pulled from the active research b
 
 ## What is not included
 
+Since publications related to this code have not been submitted yet, I have elected to withhold all of the post-processing and plotting components. In truth, post-processing and plotting code accounts for as much of the code in the active research repository as the actual simulation components. Additionally, several versions of the *main.m* file were used to prototype and develop different numerical methods and iteration schemes. I have only included the file for the end result of this iterative software design process.
+
 ## Running the simulation
+
+I typically run the simulation in batch mode on HPC clusters, permitting quick sweeps of 1D or multi-D paramter spaces. The file to look at is *launchParallelArray.sh*, a SLURM script that can be used to lanch job arrays for sweeping multiple parameters simultaneously. Check out [SLURM documentation](https://slurm.schedmd.com/documentation.html) to learn more about how this file works.
 
 ## Input file formatting
 
 ## Mesh generation
 
 ## Numerical methods
+
+## Output format and processing
 
 ## Method of Manufactured Solutions
 
