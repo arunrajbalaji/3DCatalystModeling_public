@@ -80,7 +80,11 @@ The input for the simulation is provided in .JSON format. Here is a quick overvi
 
 ## Mesh generation
 
+Users may use exponential mesh refinement near one or both boundaries in each direction. Specification of a mimimum and maximum mesh size is enough to analytically solve for the correct analytical stretching transformation that yields a cell distribution with smooth exponential transition from the smallest to largest cells. Users may select refinement near a single boundary in particular or both boundaries in each of the dimensions.
+
 ## Boundary conditions
+
+Users have the ability to set no-flux or Dirichlet boundary conditions in each of the dimensions. Physically, we expect a no-flux condition for aqueous species at interfaces between aqueous and gaseous regions. At the interface between the catalyst and the outer bulk electrolyte, we set Dirichlet conditions for the species concentrations and the electric potential, corresponding to the known electrolyte composition and the applied voltage.
 
 ## Numerical methods
 
