@@ -32,6 +32,8 @@ The input for the simulation is provided in .JSON format. Here is a quick overvi
 
 ### Directory, time step, and mesh parameters
 
+![Input file sample image 1a!](/inputFileImages/input_1a.png "Sample input file, figure 1a.") ![Input file sample image 1b!](/inputFileImages/input_1b.png "Sample input file, figure 1b.")
+
 Here, you can select the directory where the input file is located and where ouput files will be generated. You can also specify whether the simulation will be restarted from previous output files.
 
 Select the target time step, in addition to the time-intervals for output generation and plotting (mostly useful for real-time debugging purposes when running on an interactive node). You may choose to sweep the voltage to produce a voltammogram, but I usually run in galvanostatic mode. You may ramp the Faradaic reaction kinetic parameters to their final values, if desired: this helps ease the initial transient, improving stability during early times.
@@ -44,7 +46,7 @@ This is also where you specify the rectilinear domain size for the aqueous regio
 
 Finally, this is also where all of the gas-phase parameters are set, including composition, domain size, and flow rate. Porosity and tortuosity of the gas-transporting region can be set appropriately, in addition to pressure of the gas supply.
 
-![Input file sample image 1!](/inputFileImages/input_1.png "Sample input file, figure 1.")
+### Boundary condition specification
 
 Boundary condition selection occurs here. 
 
