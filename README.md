@@ -92,8 +92,9 @@ We offer a brief summary of the key numerical methods; an exhaustive description
 
 ## Output format and processing
 
-## Method of Manufactured Solutions
+Separate binary output files are created for the aqueous region and gaseous region, labeled with the simulation name and the time step. I have provided functions for reading in the binary files and producing human-readable MatLab data structures, which can be found in *source/*
 
 ## Notes files
 
-##
+- **Please see the notes/generalNotes.txt file for details about units and definitions of input parameters**
+- The *notes/doNext.txt* file is a track record of objectives set and completed in the active research branch
