@@ -88,6 +88,8 @@ Users have the ability to set no-flux or Dirichlet boundary conditions in each o
 
 ## Numerical methods
 
+We offer a brief summary of the key numerical methods; an exhaustive description will appear in an upcoming publication. Second-order central differences are used for spatial discretization, and a third-order, implicit, multi-step method is used for temporal discretization. The start-up steps use lower-order implicit schemes in time, since the third-order method requires data from three previous points in time (which are not available for clean starts). Crucially, we use an iterative approach to coupling the equations. Furthermore, the selection of implicit numerics in the narrowest dimension improves numerical stability while enabling parallel decomposition of the domain. Thus, examining *main.m*, you will find that the **par-for** loop is used to parallelize the aqueous-phase solve for each time step.
+
 ## Output format and processing
 
 ## Method of Manufactured Solutions
