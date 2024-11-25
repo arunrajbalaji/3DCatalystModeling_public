@@ -40,7 +40,7 @@ This is where you specify the rectilinear domain size for the aqueous region, an
 
 ![Input file sample image 1!](/inputFileImages/input_1.png "Sample input file, figure 1.")
 
-Boundary condition selection occurs here.
+Boundary condition selection occurs here. 
 
 ![Input file sample image 2!](/inputFileImages/input_2.png "Sample input file, figure 2.")
 
