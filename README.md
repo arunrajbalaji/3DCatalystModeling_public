@@ -24,7 +24,11 @@ Since publications related to this code have not been submitted yet, I have elec
 
 I typically run the simulation in batch mode on HPC clusters, permitting quick sweeps of 1D or multi-D paramter spaces. The file to look at is *launchParallelArray.sh*, a SLURM script that can be used to lanch job arrays for sweeping multiple parameters simultaneously. Check out [SLURM documentation](https://slurm.schedmd.com/documentation.html) to learn more about how this file works.
 
+Also be sure to check out *source/runParallelJob.m*, where you can see exactly how parallel jobs are launched. This is also where you can learn details of how to modify *launchParallelArray.sh* in order to sweep multiple paramters simultaneously, instead of just a single parameter (currently, it's a sweep of steady state current densities).
+
 ## Input file formatting
+
+The input for the simulation is provided in .JSON format.
 
 ## Mesh generation
 
