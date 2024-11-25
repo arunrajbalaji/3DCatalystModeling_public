@@ -28,7 +28,7 @@ Also be sure to check out *source/runParallelJob.m*, where you can see exactly h
 
 ## Input file formatting
 
-The input for the simulation is provided in .JSON format. Here is a quick overview of the different sections of the input file. This will also help you get a quick sense of how flexible and adaptable the software is.
+The input for the simulation is provided in .JSON format. Here is a quick overview of the different sections of the input file. This will also help you get a quick sense of how flexible and adaptable the software is. **For details about units for each of the parameters, please see the notes/generalNotes.txt file.**
 
 ### Directory, time step, operating mode, mesh, and gas parameters
 
@@ -44,11 +44,39 @@ The input for the simulation is provided in .JSON format. Here is a quick overvi
   - Mesh refinement near the boundaries is an option here. The "LRC" variable lets you specify if you would like refinement (down to the "min" parameter) near the left boundary, right boundary, or both boundaries.
 - Finally, this is also where all of the gas-phase parameters are set, including composition, domain size, and flow rate. Porosity and tortuosity of the gas-transporting region can be set appropriately, in addition to pressure of the gas supply.
 
-### Boundary condition specification
-
-Boundary condition selection occurs here. 
+### Boundary conditions and physical constants
 
 ![Input file sample image 2!](/inputFileImages/input_2.png "Sample input file, figure 2.")
+
+- Boundary conditions in each of the dimensions (no-flux at hydrophilic/hydrophobic interfaces)
+- The "y Right" boundary is the interface between the catalyst and bulk electrolyte
+  - Dirichlet conditions are used, corresponding to the known electrolyte properties
+  - The electric potential is fixed
+- Physical consants are assigned standard values
+
+### Porous structure and aqueous species
+
+![Input file sample image 3!](/inputFileImages/input_3.png "Sample input file, figure 3.")
+
+- There is only a single "layer" here (the "layer" terminology is a vestige of antoher project for simulation of multi-layered cells, which uses a similar input file format)
+- Properties of the porous structure may be set here
+- The aqueous species, diffusion coefficients, valences, and initial concentrations are set here
+- You can specify the LaTeX names, for fancy plot labeling
+
+### Homogeneous reactions
+
+![Input file sample image 4!](/inputFileImages/input_4.png "Sample input file, figure 4.")\
+
+- Elementary homogeneous reactions and rates
+- The Wien coefficient is a vestigal parameter from a previous study on bipolar membranes, it is typically not used here
+  - But, the option exists, in case it should become relevant in a future application
+
+### Faradaic reactions
+
+![Input file sample image 5!](/inputFileImages/input_5.png "Sample input file, figure 5.")
+
+- Electron-transferring reaction at the pore walls in the Cu phase
+- **For details about units for each of the parameters, please see the notes/generalNotes.txt file.**
 
 ## Mesh generation
 
