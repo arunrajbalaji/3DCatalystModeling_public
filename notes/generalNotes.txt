@@ -1,0 +1,88 @@
+System Units
+-------------------------------------------------------------------------------
+
+----- Dimensions -----
+Length                          -       meter
+Time                            -       second
+
+----- Fields -----
+Concentration (INPUT)           -       mole/liter
+Concentration (SYSTEM)          -       mole/meter^3
+Concentration (PLOT)            -       mole/liter
+Potential (ALL)                 -       Volt
+
+----- Boundary Conditions----- 
+Dirichlet conc. (INPUT)         -       mole/liter
+Dirichlet conc. (SYSTEM)        -       mole/meter^3
+Dirichlet potential (ALL)       -       Volt
+
+Neumann conc. (INPUT)           -       (mole/liter)*(meter/s)
+Neumann conc. (SYSTEM)          -       mole/(meter^2 * s)
+Neumann potential (ALL)         -       Volt/meter
+
+Neumann sign convention         -       aligned with coordinate axes
+  X Front       :       Positive is INTO domain
+  X Back        :       Positive is OUT of domain
+  Y Left        :       Positive is INTO domain
+  Y Right       :       Positive is OUT of domain
+  Z Bottom      :       Positive is INTO domain
+  Z Top         :       Positive is OUT of domain
+
+----- Constants -----
+Diffusion Coefficient           -       meter^2/second
+Permittivity                    -       Farad/meter
+stericA                         -       meter
+Temperature                     -       Kelvin
+
+----- Homogeneous Reactions -----
+forwardRateCoeff (INPUT)        -       mole/liter basis
+                                        based on order of reaction
+forwardRateCoeff (SYSTEM)       -       mole/meter^3 basis
+                                        based on order of reaction
+
+----- Faradaic Reactions -----
+exchangeCurrentDensity          -       Amp/(meter^2)
+                                          SIGNED QUANTITY:
+                                          Positive is current INTO fluid 
+                                          Negative is current OUT OF fluid
+surfaceRoughness                -       1/meter = meter^2/meter^3
+activationEnergy                -       Joule/mole
+standardElectrodePotential      -       Volt
+
+----- Gas Phase Parameters -----
+spanwiseLength                  -       Length of device in spanwise direction
+                                        (narrow dimension of finger) (meter)
+gasFlowInlet                    -       meter^3/s (m^3 of gas)
+gasChannelRatio                 -       Fraction of total length that is
+                                        occupied by gas channel (as opposed to
+                                        ribs)
+gasFingerRatio                  -       Fraction of total length that is
+                                        occupied by wetted catalyst (as opposed
+                                        to gas-transporting  medium)
+gasChannelHeight                -       Height of gas channel (meter)
+gasDiffusionHeight              -       Height of GDL (meter)
+
+NOTE: catalyst layer height is pulled from wetted domain size (Y direction)
+
+gasPorosity                     -       Porosity of gas diffusion layer (and
+                                        gas transporting medium in CL)
+gasTortuosity                   -       Tortuosity of gas diffusion layer (and
+                                        gas transporting medium in CL)
+gasPressure                     -       Pa
+gasInitialMoleFraction          -       Mole fraction (sum = 1)
+gas moleFraction (SYSTEM)       -       Mole fraction (nonDimensional)
+henrysLawConstant               -       mol/L/bar (from NIST), we reduce by
+                                        factor of 5 to account for Sechenov
+                                        constant
+(Chemical Engineering Science, Vol. 50, No. 10, pp. 1673-1675, 1995)
+
+Code immediately converts henry's law constant to system units mol/m^3/Pa
+
+----- Bulk Electrolyte Parameters -----
+electrolyteKinematicViscosity   -       meter^2/s
+bulkElectrolyteThickness        -       meter (Thickness of outer electrolyte,
+                                        assumed to be at yRight position)
+electolyteFlowRate              -       meter^3/s (need to convert from mL/min)
+                                        (NOTE: spanwise dimension relative to
+                                        flow is taken to be spanwiseLength from
+                                        gas phase parameters. Square device.)

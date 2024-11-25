@@ -1,0 +1,263 @@
+{
+  "dirName": "dev",
+  "newStart": 1,
+  "restartFileName": "restart",
+  
+  "timeStepOverride": 1,
+  "dt": 2.5e-3,
+  "dtOut": 2.5E-3,
+  "dtPlot": 2.5E-3,
+  "tEnd": 1.0E6,
+  "tStart": 0.0,
+
+  "voltageSweepOn": 0,
+  "voltageFileName": "voltageSweep.mat",
+  "voltageSweepRate": 2.0,
+
+  "xInterfaceLocs": [
+    0,
+    0.0004
+  ],
+
+  "yInterfaceLocs": [
+    0,
+    0.0005
+  ],
+  "dyMin": 5E-5,
+  "dyMax": 5E-5,
+  "yLRC": 0,
+
+  "zInterfaceLocs": [
+    0,
+    0.0006
+  ],
+  "dzMin": 6E-5,
+  "dzMax": 6E-5,
+  "zLRC": 0,
+
+  "membraneLayers": [2],
+
+  "xFrontFluxCondition": 1,
+  "xBackFluxCondition": 1,
+  "xFrontPotentialNeumannCondition": 0,
+  "xBackPotentialNeumannCondition": 0,
+  "xFrontBCValues": [0, 0, 0, 0, 0, 0, 0],
+  "xBackBCValues": [0, 0, 0, 0, 0, 0, 0],
+  "xFrontPotentialBCValue": 0,
+  "xBackPotentialBCValue": 0,
+
+  "yLeftFluxCondition": 1,
+  "yRightFluxCondition": 1,
+  "yLeftBCValues": [0, 0, 0, 0, 0, 0, 0],
+  "yRightBCValues": [0, 0, 0, 0, 0, 0, 0],
+  "yLeftPotentialNeumannCondition": 1,
+  "yRightPotentialNeumannCondition": 1,
+  "yLeftPotentialBCValue": 0,
+  "yRightPotentialBCValue": 0,
+
+  "zBottomFluxCondition": 1,
+  "zTopFluxCondition": 1,
+  "zBottomBCValues": [0, 0, 0, 0, 0, 0, 0],
+  "zTopBCValues": [0, 0, 0, 0, 0, 0, 0],
+  "zBottomPotentialNeumannCondition": 1,
+  "zTopPotentialNeumannCondition": 1,
+  "zBottomPotentialBCValue": 0,
+  "zTopPotentialBCValue": 0,
+  
+  "T": 298,
+  "e": 1.602E-19,
+  "kb": 1.38E-23,
+  "NA": 6.022E23,
+  "m3ToLiter": 1E3,
+  "stericA": 2.0E-10,
+  
+  "layers": [
+    {
+      "layerID": 1,
+      "porosity": 1,
+      "tortuosity": 1,
+      "permittivity": 6.934E1,
+      "backCharge": 0,
+      "coIonIndices": [],
+      "dxMax": 4e-5,
+      "dxMin": 4e-5,
+      "gridSymmetry": 0,
+      "species": [
+        {
+          "name": "CO2",
+          "activityCoeff": 1,
+          "diffusionCoeff": 1.0E-9,
+          "valence": 0,
+          "initVal": 0.0
+        },
+        {
+          "name": "H2CO3",
+          "activityCoeff": 1,
+          "diffusionCoeff": 1.00E-9,
+          "valence": 0,
+          "initVal": 0.0
+        },
+        {
+          "name": "HCO3-",
+          "activityCoeff": 1,
+          "diffusionCoeff": 1.00E-9,
+          "valence": -1,
+          "initVal": 1.0
+        },
+        {
+          "name": "CO3-2",
+          "activityCoeff": 1,
+          "diffusionCoeff": 1.00E-9,
+          "valence": -2,
+          "initVal": 0.0
+        },
+        {
+          "name": "OH-",
+          "activityCoeff": 1,
+          "diffusionCoeff": 1.00E-9,
+          "valence": -1,
+          "initVal": 0.0
+        },
+        {
+          "name": "H+",
+          "activityCoeff": 1,
+          "diffusionCoeff": 1.00E-9,
+          "valence": 1,
+          "initVal": 0.0
+        },
+        {
+          "name": "K+",
+          "activityCoeff": 1,
+          "diffusionCoeff": 1.00E-9,
+          "valence": 1,
+          "initVal": 1.0
+        }
+      ],
+      "reactions": [
+        {
+          "reactants": ["H2CO3"],
+          "products": ["HCO3-", "H+"],
+          "forwardRateCoeff": 2.51E6,
+          "wienCoeff": 0.0
+        },
+        {
+          "reactants": ["HCO3-", "H+"],
+          "products": ["H2CO3"],
+          "forwardRateCoeff": 1E10,
+          "wienCoeff": 0.0
+        },
+        {
+          "reactants": ["HCO3-"],
+          "products": ["CO3-2", "H+"],
+          "forwardRateCoeff": 4.8E-1,
+          "wienCoeff": 0.0
+        },
+        {
+          "reactants": ["CO3-2", "H+"],
+          "products": ["HCO3-"],
+          "forwardRateCoeff": 1.0E10,
+          "wienCoeff": 0.0
+        },
+        {
+          "reactants": ["CO2", "OH-"],
+          "products": ["HCO3-"],
+          "forwardRateCoeff": 2.2E3,
+          "wienCoeff": 0.0
+        },
+        {
+          "reactants": ["HCO3-"],
+          "products": ["CO2", "OH-"],
+          "forwardRateCoeff": 5.15E-5,
+          "wienCoeff": 0.0
+        },
+        {
+
+          "reactants": ["H2O", "CO2"],
+          "products": ["H2CO3"],
+          "forwardRateCoeff": 3.0E-2,
+          "wienCoeff": 0.0
+        },
+        {
+          "reactants": ["H2CO3"],
+          "products": ["CO2", "H2O"],
+          "forwardRateCoeff": 1.76E1,
+          "wienCoeff": 0.0
+        },
+        {
+          "reactants": ["H2CO3", "H2O"],
+          "products": ["HCO3-", "H+"],
+          "forwardRateCoeff": 2.51E6,
+          "wienCoeff": 0.0
+        },
+        {
+          "reactants": ["HCO3-", "H+"],
+          "products": ["H2CO3", "H2O"],
+          "forwardRateCoeff": 1.0E10,
+          "wienCoeff": 0.0
+        },
+        {
+          "reactants": ["HCO3-", "HCO3-"],
+          "products": ["CO3-2", "H2CO3"],
+          "forwardRateCoeff": 1.9E3,
+          "wienCoeff": 0.0
+        },
+        {
+          "reactants": ["CO3-2", "H2CO3"],
+          "products": ["HCO3-", "HCO3-"],
+          "forwardRateCoeff": 1.0E10,
+          "wienCoeff": 0.0
+        },
+        {
+          "reactants": ["H2CO3", "OH-"],
+          "products": ["HCO3-", "H2O"],
+          "forwardRateCoeff": 1.0E10,
+          "wienCoeff": 0.0
+        },
+        {
+          "reactants": ["HCO3-", "H2O"],
+          "products": ["H2CO3", "OH-"],
+          "forwardRateCoeff": 4.0E-1,
+          "wienCoeff": 0.0
+        },
+        {
+          "reactants": ["HCO3-", "OH-"],
+          "products": ["CO3-2", "H2O"],
+          "forwardRateCoeff": 1.0E8,
+          "wienCoeff": 0.0
+        },
+        {
+          "reactants": ["CO3-2", "H2O"],
+          "products": ["HCO3-", "OH-"],
+          "forwardRateCoeff": 2.08E4,
+          "wienCoeff": 0.0
+        },
+        {
+          "reactants": ["H2O"],
+          "products": ["H+", "OH-"],
+          "forwardRateCoeff": 1.0E-4,
+          "wienCoeff": 0.0
+        },
+        {
+          "reactants": ["H+", "OH-"],
+          "products": ["H2O"],
+          "forwardRateCoeff": 1.0E10,
+          "wienCoeff": 0.0
+        }
+      ],
+      "faradaicReactions": [
+        {
+          "reactants": ["test1"],
+          "products": ["test3", "test2"],
+          "moleReactantsPerMoleElectron": 1,
+          "moleProductsPerMoleElectron": [1,1],
+          "forwardRateCoeff": -1.0E9,
+          "surfaceRoughness": 5.0e-2,
+          "activationEnergy": 2.0e4,
+          "transferCoefficient": -0.5,
+          "standardElectrodePotential": 0,
+          "cRef": 0.1
+        }
+      ]
+    }
+  ]
+}

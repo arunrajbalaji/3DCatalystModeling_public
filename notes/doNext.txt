@@ -1,0 +1,827 @@
+- Fix the bicarbonate + bicarbonate reaction.
+  - FIXED - didn't have to do anything, actually.
+  - Edge cases are correct, if reactant/product indices are identical
+- Determine why reaction-diffusion code is blowing up.
+  - Probably being caused by only doing the elliptic solve (current
+    conservation) in one dimension.
+  - Going to run realistic cases and see how expensive the time-step limitation
+    is.
+  - ACTUALLY - going to set up an outer-outer iteration in order to feed in
+    guessed n+1 information, just in order to compute derivatives in the y and
+    z directions
+  - This is implemented, but not yet sure if it allows us to run with a larger
+    time step than before. Will re-evaluate after setting up a realistic
+    problem.
+- Realistic Faradaic reaction terms (with unit conversions as necessary)
+
+BUG IN CODE, FLUX BOUNDARY CONDITIONS FOR CONCENTRATION
+  - Currently using 'double negative'approach to see where the bug is
+    introduced.
+  - Code runs fine if double negative applied BEFORE initialization of fields
+  - Using BC value in ghost cell (which should not be used for flux-based BC)
+    is likely culprit
+  - Could be in wrong conditional, or could be in correct conditional but
+    accidentlly use the ghost cell value
+  - Run two cases (with/without double negative) to see differences.
+
+12/20: FIXED BUG FROM EARLIER
+  - Two problems were present. (1) Sign error in boundary fluxes, in RHS vector
+    b, within doTimeStep. (2) Negative value sensor was checking ghost cells,
+    which may contain negative values if flux is specified as negative.
+  
+  - TO DO: Check Faradaic reaction units and insert mechanism into input file
+
+  - TO DO: Solve for chemical equilbrium, save results for Dirichlet BC at
+    electrolyte bulk interface
+
+  - TO DO: Do we want to couple the interfacial CO2 dissolution to the CO2
+    concentration in the liquid? Do we set a Dircihlet condition to represent
+    equilibrium CO2 concentration at boundaries? Could do this for test case.
+
+  - TO DO: Set up a realistic case that represents a single cross section (in
+    Z) of the full GDE setup. Known flux of CO2 in from 5 sides, full
+    reaction chemistry, with applied potential in x-direction, Faradaic
+    reactions turned on
+    - *Could just use Dirichlet condition for CO2 at boundaries instead, see
+      argument above.
+
+12/21: SETTING UP REALISTIC TEST CASE
+  - Attempted runs with finer time step and noted less oscillation in the
+    x-direction, launched a sweep of dt values on the cluster, centered on
+    theorerical stability limit (4e-5, which produces good results for the NO
+    CO2 initial condition)
+    - NOTE: potential becomes very smooth at dt of 4e-5
+
+  - Tried changing number of middle and outer iterations; did NOT affect
+    solution and oscillation behavior
+
+  - TO DO: Still check Faradaic reaction unit conversions (and other things
+    from earlier)
+
+  - input file (zSliceTestCase) has correct dimensions and reasonable mesh, for
+    now. No applied potential or Faradaic reactions.
+
+12/23: DEBUGGING OUTPUT PRODUCTION METHOD
+  - Found bug in indexing for doOutput. Need to rerun cases in order to get
+    meaningful output files.
+
+  - Did find out that 4e-5 is the stability limit, based on cases that crashed
+    on cluster. Will relaunch exact same caes in order to get insight into how
+    blow up
+
+  - TO DO: Finish binary reading file. Already started.
+
+01/11: COMPLETE BINARY READING AND SNAPSHOT PLOTTING
+  - Completed infrastructure for outputting convenient info from main_general
+    and reading/plotting of binary output files.
+
+  - Question - is numerical stability limited by diffusion time scale or
+    chemistry time scale? Launched cases on cluster with smaller D for all
+    species. If dt limit moves accordingly, can confirm diffusion limited.
+
+  - Confirmed that number of outer iterations does NOT affect stability limit
+
+  - TO DO: Check Faradaic reaction units
+
+  - TO DO: Continue setting up realistic test case for single slice in z. Need
+    applied potential, Faradaic reactions, realistic boundary conditions.
+
+01/12: LAUNCH FINAL DIFFUSION TIME TEST, CHECK FARADAIC TERM
+  - Time step limit does seem to be related to diffusion - were able to use
+    larger dt when decreasing diffusion coefficients.
+
+  - Checked Faradaic reaction term units, looks correct now. No changes
+    required, except conversion of cRef to system units (parseInputFile).
+
+  - Determined realistic constants for Faradaic reaction. 
+
+  - TO DO: Experiment with different applied potential values, turning
+    homogeneous reactions on/off to see whether Faradaic reaction term is
+    actually doing anything
+
+  - TO DO: Launch chemical equilibration case (small domain, no diffusion,
+    beefy time step).
+
+01/19: FIX FARADAIC TERM SCALING, (RE)DISCOVER EDL PROBLEM
+  - Confirmed that diffusion time scale in transverse direction (finest
+    dimension) is limiting the time step. Are able to reliably predict the
+    critical time step for stability.
+
+  - Playing around with Faradaic reaction to see evidence of term working.
+    Scaling argument from last time needed to be fixed, since it did not
+    consider activation energy (nine orders of magnitude).
+
+  - Can see impact of Faradaic reactions now, with realistic parameters
+
+  - EDL PROBLEM - Our equations describe the electroneutral outer problem.
+    Consider a simple blocking surface with applied electric field pointed
+    toward it - problem naturally produces a charged interfacial region. We
+    should be using a BC that is valid at the outer edge of the charged inner
+    zone. Simple no-flux condition is valid for inner problem, NOT for outer
+    problem.
+
+  - TO DO: Derive asymptotically valid BC for outer problem at no-flux
+    condition surface. May need to be dynamic. Simple no-flux seems to be valid
+    only at steady state
+
+  - DISCUSSION WITH ALI:
+    - Need to use dPhi/dN = 0 in conjunction with no-flux
+      condition. Asymptotic derivation would likely get to the same place.
+      Electric field will be shielded by charged layer.
+    - Phi_electrode is different from the boundary value of phi_liquid. Need to
+      create a separate input variable for phi_electrode (copper phase). Will
+      compute value of phi_liquid at the boundary.
+    - Dirichlet condition at electrolyte side leads to thin zone over which
+      equlibration occurs, since we aren't truly modeling the electrolyte
+      region. Can treat by 1) accepting it, using finer mesh, ensuring that it
+      is a small error. 2) Developing a convective (characteristics-based)
+      boundary condition for that end of the domain. Anions leave domain
+      freely, Cations enter domain (but need to decide what concentrations...)
+        - PROPOSAL: Set the Dirichlet value of H+ to be in Eq. with OH- leaving
+          the domain (extrapolated value onto the edge of the domain). Set the
+          Dirichlet value of K+ to yield an electroneutral solution at the
+          domain boundary. All anions are allowed to exit freely (one-sided
+          derivatives)
+
+  - TO DO: Phi electrode as input parameter, not coupled to boundary condition
+           (DONE)
+  
+  - TO DO: Fix electrolyte boundary condition (convective treatment with
+           cation electroneutrality and chemical Eq.)
+
+  - TO DO: Measure and report flux of ions (into electrolyte)
+
+01/20: CONVECTIVE BOUNDARY TREATMENT FOR ELECTROLYTE (BRAINSTORMING)
+  - Approach 1 (hardcore) - compute the delta terms and RHS terms based on
+    convective treatment at boundaries, which will be different for positive,
+    negative and neutral species. Apply these in the correct locations, for
+    each of the three fluxes.
+
+  - Approach 2 (iterative) - Utilize the ghost cell values in x. Dynamically
+    updated the ghost cell values such that they honor one sided derivatves for
+    anions and equlibrium conditions for cations. X BC values will be a
+    function of y and z, and will change in time - add routine to recompute
+    at beginning of doTimeStep (for each individual x strip).
+      - Anions determined based on extrapolation from catalyst domain
+      - Cations and Neutrals determined based on chemical equilibration
+      - If starting with equlibrium state and only perturbing slightly
+        (perturabation comes from updated anion concentration values), then
+        should only require a few iterations to get close to equilibrium again.
+
+01/25: CONVECTIVE BOUNDARY TREATMENT DERIVATION
+  - Determined boundary condition treatment using flux measurement and integral
+    boundary condition. See handwritten notes.
+
+  - Flags for boundary treatment have already been created, and have created a
+    3D structure to store the boundary flux for each species (is now a function
+    of y and z).
+
+  - Need to modify the values accordingly, and feed the right slice of the 3D
+    structure into the doTimeStep function.
+
+  - TO DO: Complete convective boundary treatment implementation.
+
+02/01: BEGIN GAS PHASE SOLVER
+  - Convective boundary treatment is bogus, will not allow any accumulation of
+    cations. Going to model fluid boundary layer in outer domain (do last,
+    after gas phase).
+
+  - Added input file and parseInputFile machinery for gas phase constants.
+    Equations are written down on paper.
+
+  - TO DO: Implement 1D gas phase solver for velocity and concentrations,
+    outside of doTimeStep. 
+
+02/08: BEGIN GAS PHASE IMPLEMENTATION
+  - Added functions for RHS evaluation in explicit scheme (RK4) for gas
+    velocity and concentration fields. All the magic happens in these
+    functions.
+
+  - Added plotting capability for gas partial pressures and velocity.
+
+  - TO DO: Return to RHS for concentration evolution, implement one-sided
+    scheme for convective treatment at outflow.
+
+02/09: CONTINUE GAS PHASE IMPLEMENTATION
+  - Implemented RHS function evaluation for Faradaic reaction based gas
+    generation in the gas phase. Has NOT been tested yet, see issue 2
+
+  - Started thinking about correct parameters to describe the macroscopic
+    geometry, and make sure we have the correct size ratios when coupling the
+    electrolyte domain to the gas domain
+
+  - TO DO: Come up with best set of parameters to describe both macro and micro
+    geometries (and relation between them), modify input parameters to match.
+  
+  NOTE: FIX AREA RATIO IN INPUT (FRACTION OF XY PLANE)
+  sim = Atot - sum(Afin), UinAtot = USimAsim
+  as domain - volumetric production rate (infinitely fast mixing)
+
+02/17: COMPLETE FARADAIC REACTION GAS HANDLING
+  - Develop consistent set of parameters to describe relationship between
+    macroscopic (device level) and microscopic (finger level) geometries. See
+    generalNotes file for details.
+
+  - Added source term for gaseous products of Faradaic reactions. Is able to
+    produce a small amount of ethylene. Currently does NOT account for CO2
+    consumption at the boundaries.
+
+  - TO DO: See if C2H4 production matches current through system (check that
+    conservation properties are enforced)
+
+  - TO DO: Add second faradaic reaction and check conservation properties
+
+  - TO DO: Account Henry's law to modify CO2 BC and flux at boundaries
+
+  - TO DO: Add gas solve for velocity field.
+
+03/01: CONTINUE GAS PHASE SPECIES TRANSPORT COUPLING
+  - Checked that concentration of species in gas phase is changing
+    appropriately with respect to Faradaic source terms
+
+  - Added second Faradaic reaction and confirmed that H2 is produced
+
+  - Implemented x-direction handling of CO2 flux into the electrolyte. Is only
+    implemented as 1-way coupling for now - concentration in gas phase is
+    affected by flux in the liquid AT the liquid/gas interface
+
+  - Implemented y-direction handling of the above, WITH ISSUES (see below)
+
+  - TO DO: We added the capability to treat neutral gas species with Dirichlet
+    condition while using Flux condition for all other species. Causing issues
+    in the potential equation (likely), check xStripLeft or yBCValues for bogus
+    values
+
+  - TO DO: Fix right Y BC handling, similar to left
+
+  - TO DO: See above (Henry's law, velocity equation)
+
+03/02: GAS PHASE COUPLING DEBUG
+  - Found bug in gas phase code - no need to consider flux condition for
+    neutral gas species dissolved in fluid.
+
+  - Added reaction ramp rate, which is required to circumvent nasty transient
+    fast reactions lead to very thin zones if there is small error in boundary
+    condition values. Bulk values change basically within one time step,
+    leading to unresolved (artifical) zone near boundaries
+
+  - Launched case with very fine time step to see if we can avoid
+    checkpointing. Checkpointing works if no Faradaic reactions occur, but
+    but presence of Faradaic reactions leads to aggravation of potential and
+    checkpointing fails
+
+  - TO DO: Figure out why potential starts to oscillate near yLeftBoundary in
+    the first place; find fix to allow Faradaic reactions to run.
+
+03/08: RESULTS OF STABILITY TEST
+  - Code can run just fine if isNeutralGas boundary treatment is applied in the
+    x direction. Cannot run if y direction is turned on. Reason is thin
+    reaction diffusion zones that form near the boundaries. Implicit is able to
+    deal with this. Explicit struggles: small grid requirement leads to
+    unacceptable time step, large time step blows up.
+
+  - Worse with Faradaic reactions turned on too. Also worse with OUTERMOST
+    iterations activated.
+
+  - Future direction: ADI scheme in x/y seems necessary to avoid time step
+    restriction. Thinking about how to develop ADI with minimal hassle
+      - IDEA 1: Could make separate input files for x and y direction, which
+        allows a convenient way of saving all the bc information and constants.
+
+      - IDEA 2: Some kind of a parity flag (four possible states) could be used
+        to call the appropriate doTimeStep routine (with the parfor as well,
+        maybe)
+
+  - Note about ADI: Need to alternate which comes first - |x y|y x|x y|y x|
+
+03/11: Summary of meeting with ali / ELECTROLTYE BOUNDARY TREATMENT
+  - Do NOT need to run ADI, even though ADI would probably solve the problem
+    and allow us to resolve thin zones in both dimensions.
+
+  - Four different boundary conditions will be used at the electrolyte boundary
+      1) Anions - outflow condition, since characteristics are leaving
+      2) Cations - Use boundary value of anions to compute equilibrium, by
+                   extapoating anion values and using chem Eq. to compute cation
+                   concentrations at cell face
+                 - We are applying this to protons, and will be using
+                   extapolated hydroxide values since hydroxide will dominate
+                   and equilibrium is very fast
+      3) Cations (non-reacting) - Simple Dirichlet condition is ok, using the
+                                  equilibrium solution concentration
+                                  (i.e., initial concentration)
+      4) Neutrals - Robin-type boundary condition, coupling to laminar boundary
+                    layer outside flux at boundary should be equal to diffusive
+                    flux in boundary layer (1/3 power law, with nominal spanwise
+                    length)
+
+  - Completed the treatment for anions and cations, though there seems to be a
+    bug that causes blow-up (matrix singularity) at the very first time step.
+    Need to debug this before adding neutrals (last part to do)
+
+  - TO DO: Debug electrolyte BC and add neutrals treatment.
+
+  - TO DO: Get back to the prior list of to-do items.
+
+03/13: DEBUG ELECTROLYTE BOUNDARY CONDITION OVERRIDE
+  - Handled bugs in current conservation code (incorrect handling of boundary
+    extrapoltion/differentiation), allowing code to run with electrolyte BC
+    handling for cations and negatives. Only missing neutrals.
+
+  - Realized that entire current conservation code uses diff isntead of
+    effectiveDiff, so changed all instances accordingly.
+
+  - TO DO: electrolyte bc implementation for Neutrals
+
+  - TO DO: Return to prior list of to-dos. 
+
+03/14: ELECTROLYTE BC COMPLETION
+  - Completed electrolyte boundary condition for neutrals in scalar boundary
+    layer, but need to debug. Currently, seems that K+ BC is not honored
+    ideally. There are oscillations in all anion concentrations. Problem could
+    be associated just with  corner - this is where oscillations are the worst.
+
+  - TO DO: Debug, figure out source of oscillations and correct.
+
+  - TO DO: Fix geometry mismatch in gas phase code (due to rotation)
+
+  - TO DO: Run long duration cases to see if stable
+
+03/15: ELECTROLYTE BC DEBUGGUING
+  - Corrected steric flux term at yRight boundary for electorlyte override,
+    which was using bogus xStripRight values for steric sum
+
+  - Changed outer iterations to 3 - noted improvement
+
+  - TO DO: Need to write out iteration scheme in detail and make sure we are
+    passing the correct values for each processor to deal with, and updating
+    the correct fields
+
+  - TO DO: longer run to test stability
+
+  - TO DO: gas phase geometry mistmatch
+
+03/16: ITERATION SCHEME DEBUGGING
+  - Found that outer iterations must serve as delta iterations, and that a
+    large number are required for smoothness. Has to do with rate of
+    information propagation, and fact that we are trying to solve an elliptic
+    equation using only 1D strips. 
+
+  - Middle iterations are necessary and helpful, but not improvement for >3
+
+  - Fixed bug - starred values were not being used at all, in doTimeStep, since
+    wrong variable was passed in from main general
+
+  - Fixed bug - Needed to use correct 'old' value for temporal term
+
+  - Fixed bug - Needed to update star variable at END of both c and phi solves,
+    not in between the two
+
+  - Submitted four-day test on cluster. Might still need to think about yRight
+    BC is not perfectly holding the boundary condition.
+
+  - TO DO: See results of 4-day tests, boundary performance
+  
+  - TO DO: Fix gas phase geometry and integration
+
+03/20: COMPLETE GAS PHASE GEOMETRY FIX
+  
+  - TO DO: Change plot axis aspect ratios to better match geometry
+
+  - TO DO: Video generation over time
+
+  - TO DO: Are we at steady state at 10 seconds?
+
+  - TO DO: Henry's Law
+
+  - Implemented gas phase velocity calculation
+
+  - Verified results of longer run, was able to get to 10 seconds successfully
+    without any obvious errors
+
+  - Added neutral gas treatment to yLeft boundary, which now works fine -
+    earlier error must have been due to incorrect iteration scheme.
+
+  - Corrected gas phase geometry mismatch.
+
+  - Added output capability for all gas phase variables, and plottig capability
+    for a single snapshot.
+
+  - Launched long job with velocity solve
+
+03/21: POWER OUTAGE DAY 
+
+  - TO DO: Code to compute anion fluxes into electrolyte
+
+  - TO DO: Code to determine gas outflow composition
+
+  - TO DO: Parameter study?
+
+03/22: HENRY"S LAW AND POST PROCESSING
+
+  - TO DO Sequence:
+    - Verify Henry's Law implementation is stable
+    - Develop current and gas outflow composition computation code
+    - Develop video generation code
+    - Launch longer case with Henry's Law (if possible)
+    - Determine if converged at 10 seconds
+    - Parameter fitting/setting
+
+  - BUG DISCOVERED: y and z direction electromigration fluxes (in
+    concentration and override portion of potential solver) were missing
+    factor of e/kb/T. Added this back in - causes code to blow up.
+  
+  - Blow-up occurs on both ends of the domain (yLeft, yRight). z direction (no
+    electric field) does not seem to be affected. Neutral species do not seem
+    to be affected
+
+  - IDEA: Error could actually be affecting all the interior cells - not
+    uniquely a boundary condition problem?
+
+  - Debugging approach - determine flux computed at the same interfaces but
+    from the two different xStrips - should be identical, but are not for some
+    reason
+
+03/23: DEBUG complete
+  - Was missing factor of e/kbT, which is now included. 
+
+  - Needed to cut dt by factor of 2 to avoid numerical oscillations, likely
+    because we happened to be at the limit of stability. With cut in dt, we are
+    also able to use only 3 iterations instead of 15 -> 2.5x speedup
+
+  - NOTE: More iterations do produce a smoother solution in early time steps
+    (particularly in y), but 3 is enough to avoid blowing up during the
+    transient
+
+  - VARIABLES LEFT TO POST PROCESS:
+    yPotentialDrop, faradaicCurrent, co2Flux, reactionFields
+
+  - SUMMARY OF CASES LAUNCHED
+    - Number of outer iterations
+      - Henry5 (CRASHED)
+      - HENRY10 - still running
+      - HENRY15 - still running
+
+    - Applied voltage variation:
+      - V = 0.1
+      - V = 0.3
+      (10 iterations)
+    
+    - Faradaic reaction exchange current density
+      - K = -2e4
+      - K = -2e3
+      (10 iterations)
+
+  - Completed post-processing code:
+    - Individual, total, and mean current density, and total current
+    - Gas composition over time (at outlet) and over z dimension
+
+04/12: Begin search for mass conservation bugs
+  - TO DO: Instead of time step refinement (or in addition), adaptively
+    increase number of outer iterations (which are responsible for solving the
+    elliptic equation in the y-direction).
+
+  - TO DO: Find data and parameters to use for validation against experiments
+
+  - TO DO: Why does code blow up if tortuosity is increased to 2.2361?
+
+  - Found error in post processing code: current density only passes through
+    effective area of fingers (in x-z plane), but performance is quoted in
+    current density per total device area.
+
+  - Fixed gas phase partial pressure issue, ensuring that total pressure is
+    constant at all times and all locations. Had unit conversion issues in the
+    gas phase solve
+
+  - Changed the gas concentration solve to mole fractions instead of
+    concentrations. Plays better with partial pressure usage in Henry's Law,
+    other places wherepartial pressure is important.
+
+  - TO DO: Figure out mass conservation issue. Currently, seems like the amount
+    of CO2 going into the WCD (via dissolution) is much larger (orders) than
+    the rate of homogeneous, faradaic reactions, and flow out. Flow out is
+    orders larger than homogeneous and faradaic reactions. Launched long term
+    case to see what the situation is like after (initial?) CO2 equilibration.
+
+04/13: FIND MASS CONSERVATION BUGS
+
+  - Discovered two problems with gas dissolution flux computation: effective
+    diffusivity was not implemented, and there was a sign error in the
+    one-sided difference used to compute boundary CO2 fluxes.
+
+  - Launched 5 cases, to solve blow-up due to Z potential oscillation at top
+      - Reference
+      - 2x z grid
+      - 4x z grid
+      - 2x outer iterations
+      - 4x outer iterations
+
+  - Fixed restart capability
+
+  - TO DO: Analyze outcomes of 5 cases above
+
+  - TO DO: Tortuosity values
+
+  - TO DO: Experimental parameters for validation
+
+04/17: CONTINUE STABILITY TESTING
+
+  - All five cases above crashed at around 1 second of physical time, at a
+    location where the OH- current becomes negative (conflicts with outlow
+    condition) and overall current is actually below peak value, only 30 mA/cm2
+
+  - Increasing number of outer iterations did show slightly higher peak current
+
+  - Increasing Z resolution made no visible changes
+
+  - Cases to run next:
+      - 2X time step refinement
+      - 4X time step refinement
+      - Voltage ramp from zero (low)
+      - Voltage ramp from zero (high)
+      - Zero voltage case
+
+  - Cases above already failed (all of them)
+
+  - Found that gas phase variables are not updated during star (outermost)
+    iteration, so changed location of this in new main_general file.
+
+  - Added relaxation parameter, just to current conservation equation. Early
+    signs promising - helped solve blowing up at SMALLER time steps.
+
+  - Cases launched:
+      - Relaxation: 0.01, 0.1, 0.25, 0.5, 0.75
+      - Voltage: 0.0, 0.3
+
+      - 2X Time Refimement at relaxation 0.25, 0.5, 0.75, 0V
+
+04/18 STABILITY TESTING, POST PROCESSING DEBUG
+
+  - Examined launched cases with relaxation parameter - all running, but with
+    differente traqnsient results.
+
+  - TO DO: See if cases above converge to the same steady state result.
+
+  - Found bugs in post processing code - specifically in carbon pathways
+    computation (several unit conversion and area conversion errors).
+
+  - Changed diffusivity of neutral species at bulk electrolyte boundary, such
+    that we consistently use the lower porosity value at the interface
+
+  - TO DO: Find the mass deficit in the carbon pathway. Seems to be a post
+    processing error (?), something O(10^-11) mol/s
+
+  - TO DO: Do we need to keep including gas phase solve inside the star loop?
+    Seems to make code very slow.
+
+  - TO DO: Experimental parameters
+
+  - TO DO: Optimize numerics (minimum number of iterations for stabilityl, time
+    step limitations, grid limitations, initialization procedure).
+
+  - NEW CASES LAUNCHED:
+      - 10 Outer, 2 Middle, Relaxation 0.5, 0.5 Volt
+      - 5 Outer, 2 Middle, Relaxation 0.5, 0.5 Volt
+      - 3 Outer, 3 MIddle, Relaxation 0.5, 0.5 Volt
+      - ALL THREE ABOVE, with gas phase outside the star loop.
+  
+04/19 STABILITY TESTING CONTINUED
+  - Current conservation bug - small current of carbonate and bicarbonate
+    exists for ZERO FLUX case - goes away when homogeneous reactions are all
+    turned off. Need to turn them on one by one to see which one leads to a
+    current of O(2e-6) for the two species mentioned, in opposite directions.
+
+  - Three outer three middle, unStar case was successful at 0.5V. Good
+    candidate for production runs.    
+
+04/20: HUNTING MASS CONSERVATION ISSUE
+  - Found that the problem is aggravated by turning certain reactions on, but
+    this is more of a symptom than a cause.
+
+  - Using identical mesh in Y and in Z solves the problem. Problem is only seen
+    in the Y direction, when the Y mesh is very fine.
+
+      TRY fine in both directions
+      TRY fine in Z and coarse in Y
+
+  - Are we flipping dY and dZ somewhere in the code? Or is there a numerical
+    problem associated with cell aspect ratio?
+
+  - Pick up testing with relaxation_0.5/0V_rxnRamp file.
+
+04/21: BUG HUNTING
+  - FOUND ONE BUG - flux computation dicrepancy between species and current
+    parts of the code (has been fixed)
+
+  - TO DO: Remove dead code from doTimeStep (slowing us down)
+
+  - TO DO: Post processing bug (computation of flux at the boundary)
+
+  - TO DO: Find remaining bug - current all goes in one direction (smooth
+    exponential function) when homogeneous reactions are turned ON. Seems to
+    happen independently of grid resolution, time step, relaxation parameter. 
+
+04/22: BUG HUNTING 2: ELECTRIC BOOGALOO
+  - Found several bugs today:
+      - Sign error in current conservation, y and z directions were incorrect
+        on RHS. THIS CORRECTION LEADS TO MUCH MORE BELIEVABLE BEHAVIOR FOR
+        POTENTIAL, CORRECT FLUXES NEAR RIGHT BOUNDARY.
+
+      - Were not re-initializing RHS vector properly within middle iterations
+
+      - Scrapped middle iterations, which lead to instability (we think there's
+        a good reason for this, need to think more about it)
+
+  - Significant negative charge is building up in the bulk - not sure if this
+    is a transient, or if there is a more fundamental sign error somewhere.
+
+  - Bug seems to be involved with Faradaic reactions, and boundary flux (?).
+    Goes away entirely if Faradaic reactions are turned off.
+
+  - Launched long term case to see whether or not bug is transient
+
+04/24: BUG HUNTING 3
+
+  - Mass conservation bug is still present, isolating it by looking at first
+    few time steps. Observing large charge througout domain. Seems to be
+    improved if time step is 1e-6 or below. Charge becomes nonzero at dt of
+    2e-6, sharply.
+
+  - Tried a few different versions of potential and concentration solve, and
+    multi-step approach. Did not lead to noticeable improvement. DON'T DO
+    POTENTIAL FIRST SOLVE - TERMS HERE ARE COMPUTED IN THE CONCENTRATION SOLVE
+    FIRST.
+
+  - Imlemented implicit treatment for Faradaic reaction terms. Led to
+    improvement, but did not completely fix the issue.
+
+  - System might be very sensitive to delta terms in the potential part of the
+    code. Found that boundary conditions were not being implemented correctly.
+    This was fixed by adding conditionals for the delta terms. However, with
+    the seemingly correct treatment, the code now blows up.
+
+  - TO DO: Isolate the bug in the potential part of the code, and fix it.
+
+04/25: POTENTIAL SOLVE DEVELOPMENT
+  - Discovered that the potential solve boundary conditions are not well posed
+    in the x direction, if we correctly apply the no flux boundary conditions.
+    If we want to solve in 1D, we would need to use yStrips (since we have a
+    Dirichlet potential condition in that direction). However, this would
+    require iteration to capture the x and y directions, but that is not
+    guaranteed to work...
+
+  - Realized that there is indeed a place for outer and inner iterations in our
+    scheme. Outer iterations are the typical delta iterations, induced by using
+    the Newton-Raphson method to solve the nonlinear implicit equation. Inner
+    iterations are required for using Newton Raphson to solve the nonlinear
+    potential equation.
+
+  - Big picture summary - need to ensure that there is an accurate phi star
+    field associated with with each set of c star fields during the outermost
+    iteration. Doing this by decoupling the potential and concentration solves,
+    running iterative scheme for phi star multiple times per star iteration.
+
+  - Almost done with separate phi solve - matrix entries and right hand side
+    have been computed, just need to efficiently construct the sparse matrix
+    using spdiags.
+
+      - Helper functions for converting linear to subscript indices was made.
+        Turns out that we don't really need it... just use ind2sub() 
+
+04/25: CONTINUE 3D POTENTIAL SOLVE
+  - Matlab is not giving us a delta that honors LHS * delta = RHS. We think the
+    issue might be with how boundary conditions are (or or are not enforced)
+    for the system.
+
+04/26: COMPLETE PRIMARY DEBUGGING OF 3D CURRENT CONSERVATION SOLVE
+  - Boundary condition issues were fixed, using correct application of
+    Dirichlet condition precisely at the cell faces (for yRight override)
+
+  - Potential profile now looks much more realistic.
+
+  - Need to determine why we are getting some net charge at the very
+    first time step, which seems to be worse at the XY corners. Also seems to
+    get worse with more iterations.
+
+04/27: CONTINUE 3D DEBUGGING, CHARGE GENERATION ISSUE
+  - Fixed consistency bugs between the concentration and potential parts of the
+    code, dealing with how the potential boundary condition is applied and
+    used. Should do this whenever possible, instead of extrapolation.
+
+  - Idea: Save all the fluxes that are computed in the potential solve, and use
+    them exactly in the concentration solve. No need to recompute. Avoids error
+    of inconstistency. 
+
+  - Implemented all the flux storage suggested in the previous idea. Working on
+    code vectorization (will help with efficiency, makes sure we eliminate
+    potential errors that are slowing down convergence.
+
+  - Idea about error mechanism: from the very first star iteration, we must not
+    allow any charge to develop in the domain. Once charge does enter (or
+    generate), the potential code does not seem to care about presence of local
+    charge, only about rates of production or consumption.
+
+  - TO DO: Does the right hand side actually exhibit perfect charge neutrality,
+    down to machine precision? If so, we need to improve convergence. If not,
+    then there is a bug.
+
+04/29: COMPLETE DEBUGGING AND LAUNCH TEST CASES
+  - Description of primary issue: linearization of the concentration solve can
+    introduce charge into the domain. Once this happens, there is no mechanism
+    for charge reduction, since current conservation looks at the rate of
+    charge production due to 'physical' reasons, not the instantaneous amount
+    of charge in the domain. This charge in the domain is particularly
+    egregious due to the jump in voltage at the initial time step.
+
+  - We solved the above issue by introducing a term to the RHS of the current
+    conservation code, representing the rate of charge production due to errors
+    (linearization based and simple numerical error) in the concentration
+    solver.
+
+  - There are two candidates for the numerical correction term, with different
+    goals: 'star' term seeks to eliminate charge production from iteration to
+    iteration, but can't do anything once charge has been introduced. This
+    might lead to error accumulation. The 'integral' term examines the amount
+    of charge present in the domain, determines a 'rate' of production that is
+    proportional to that charge, and will be nonzero as long as some net charge
+    exists. Both terms should reach zero at steady state.
+
+  - Voltage ramp rate is quite important - this removes the worst of the
+    transient behavior, which leads to substantial charge introduction (due to
+    linearization error, likely) and then requires many iterations before
+    reaching convergence.
+
+  - Cleaned up the code, removing spurious inputs. Now, we only can specify
+    boundaries as Dirichlet concentration fields (which actually are not
+    correctly implemented in current conservation, except for yRight) or
+    no-flux for concentration fields (which do work correctly for all
+    boundaries). Potential boundary condition is constrained based on the
+    above.
+
+  - Launched cases to test numerical stability and charge conservation:
+      - Varying number of iterations (3, 6, or 12)
+      - Varying charge conservation scheme ('star', 'integral', or 'both')
+
+      - Launched high voltage test (0.7, 0.8, 0.9, 1.0)
+
+04/30: STABILITY TESTING AND PARALLEL ARCHITECTURE
+  - Integral term (which is actually a proprotional controller) is necessary to
+    achieve low net charge throughout the domain. Star term on its own
+    (derivative term) is unable to keep charge within reasonable level, but
+    does help compared to nothing
+
+  - 3 star iterations and 5 potential iterations seems sufficient, with just
+    the proportional control term. Launched test cases with iteration reduction
+    partway through, after worst part of the transient response.
+
+  - Developed code for generating data folders and launching cases in parallel,
+    with the ability to sweep a single parameter at a time.
+
+05/07: CATALOGUE OF CASES
+  - voltage sweep (low flow rate):      Running w/ 1.25 relaxation, 50 s.
+  - inlet flow rate:                    Running w/ 1.25 relaxation, 48 s.
+  - pressure (three low values):        Running w/ 1.25 relaxation, 49 s.
+  - pressure (three high values):       Running w/ 1.25 relaxation, 10 s.
+  - ECSA:                               Running w/ 1.25 relaxation, 49 s.
+  - finger ratio:                       Running w/ 1.25 relaxation, 49 s.
+  - WCR porosity:                       Running w/ 1.25 relaxation, 10 s.
+  - voltage sweep (z refine):           Running w/ 1.25 relaxation, 13 s.
+  - finger thickness:                   Running w/ 1.25 relaxation, 13 s.
+  - initial CO32- concentration:        Running w/ 1.25 relaxation, 17 s.
+  - streamwise length:                  Running w/ 1.25 relaxation, 17 s.
+  - finger height (smallest):           Running (from beginning), 0 s.
+  - finger height (three largest):      Running w/ 1.25 relaxation, 19 s.
+  - voltage sweep (high flow rate):     Running w/ 1.25 relaxation, 35 s.
+
+05/08: CATALOGUE OF CASES 2
+  - WCR Porosity:       Relaunched from 0
+  - Finger thickness:   Relaunched from 12 seconds
+  - Initial CO32-:      Relaunched from 
+  - Streamwise Length:  Relaunched from 
+
+05/09: CATALOGUE OF CASES 3
+  - finT:       All cases are still running, with 1.25 relaxation. Need more
+                time for potassium current to reduce, for largest thickness
+  - finH:       Smallest case restarted from beginning
+                Largest case is reset to 2-2 iterations, to reduce potassium
+                current
+  - wPoro:      Relaunched with 1.25 relaxation parameter, all cases
+  - strL:       Relauncehd largest case with 1.25 relaxation parameter
+  - iCO3:       Relaunched with 1.25 relaxation parameter, all cases
+  - FVCaes:     All need more time with 2-2 iteration scheme before relaunching
+                with 1.25 relaxation parameter.
+
+08/04: NUMERICAL CONSISTENCY UPDATE
+  - Updated code based on handwritten notes in slack (incorporating deltas into
+    each equation from the other).
+  - Need to see why things go wrong at the first delta iteration.
+  - Coupling iterations DO seem to be doing their job though... Just slowly.
+
+08/27: DEBUGGING WITH MAKRAND
+  - Newton iteration for concentration - check residual
+  X Residual-based termination criterion (both Newton iterations)
+  X Check Matlab linear solve algorithm, tolerance
+  X Slow convergence of potential solve, and termination criteria
+      - Jacobian could be innaccurate
+      - Initial guess is poor
+  - Turn on Homogeneous reactions
+  - Check high voltage case
