@@ -30,21 +30,19 @@ Also be sure to check out *source/runParallelJob.m*, where you can see exactly h
 
 The input for the simulation is provided in .JSON format. Here is a quick overview of the different sections of the input file. This will also help you get a quick sense of how flexible and adaptable the software is.
 
-### Directory, time step, and mesh parameters
+### Directory, time step, operating mode, mesh, and gas parameters
 
 ![Input file sample image 1a!](/inputFileImages/input_1a.png "Sample input file, figure 1a.") ![Input file sample image 1b!](/inputFileImages/input_1b.png "Sample input file, figure 1b.")
 
-Here, you can select the directory where the input file is located and where ouput files will be generated. You can also specify whether the simulation will be restarted from previous output files.
-
-Select the target time step, in addition to the time-intervals for output generation and plotting (mostly useful for real-time debugging purposes when running on an interactive node). You may choose to sweep the voltage to produce a voltammogram, but I usually run in galvanostatic mode. You may ramp the Faradaic reaction kinetic parameters to their final values, if desired: this helps ease the initial transient, improving stability during early times.
-
-We include the ability to perform equilibration of homogeneous chemistry before the simulation starts, which can be useful for multi-component electrolytes where the initial condition is not in perfect equilibrium. Without this, you might have as rapid transient that causes numerical stability issues during early times.
-
-Set the electrode potential, and the target current/system capacitance for galavanostatic operation. The external (parallel) capacitor basically controls the time-scale over which the system approaches the target current.
-
-This is also where you specify the rectilinear domain size for the aqueous region, and the mesh size in each dimension. Mesh refinement near the boundaries is an option here. The "LRC" variable lets you specify if you would like refinement (down to the "min" parameter) near the left boundary, right boundary, or both boundaries.
-
-Finally, this is also where all of the gas-phase parameters are set, including composition, domain size, and flow rate. Porosity and tortuosity of the gas-transporting region can be set appropriately, in addition to pressure of the gas supply.
+- Here, you can select the directory where the input file is located and where ouput files will be generated. You can also specify whether the simulation will be restarted from previous output files.
+- Select the target time step, in addition to the time-intervals for output generation and plotting (mostly useful for real-time debugging purposes when running on an interactive node). You may choose to sweep the voltage to produce a voltammogram, but I usually run in galvanostatic mode.
+- You may ramp the Faradaic reaction kinetic parameters to their final values, if desired: this helps ease the initial transient, improving stability during early times.
+- The charge threshhold sets the tolerance for coupling between the equations (poor convergence produces spurious charge, which is non-physical)
+- We include the ability to perform equilibration of homogeneous chemistry before the simulation starts, which can be useful for multi-component electrolytes where the initial condition is not in perfect equilibrium. Without this, you might have as rapid transient that causes numerical stability issues during early times.
+- Set the electrode potential, and the target current/system capacitance for galavanostatic operation. The external (parallel) capacitor controls the time-scale over which the system approaches the target current.
+- This is also where you specify the rectilinear domain size for the aqueous region, and the mesh size in each dimension.
+  - Mesh refinement near the boundaries is an option here. The "LRC" variable lets you specify if you would like refinement (down to the "min" parameter) near the left boundary, right boundary, or both boundaries.
+- Finally, this is also where all of the gas-phase parameters are set, including composition, domain size, and flow rate. Porosity and tortuosity of the gas-transporting region can be set appropriately, in addition to pressure of the gas supply.
 
 ### Boundary condition specification
 
