@@ -28,9 +28,25 @@ Also be sure to check out *source/runParallelJob.m*, where you can see exactly h
 
 ## Input file formatting
 
-The input for the simulation is provided in .JSON format.
+The input for the simulation is provided in .JSON format. Here is a quick overview of the different sections of the input file. This will also help you get a quick sense of how flexible and adaptable the software is.
+
+### Directory, time step, and mesh parameters
+
+Here, you can select the directory where the input file is located and where ouput files will be generated. You can also specify whether the simulation will be restarted from previous output files.
+
+Select the target time step, in addition to the time-intervals for output generation and plotting (mostly useful for real-time debugging purposes when running on an interactive node). You may choose to sweep the voltage to produce a voltammogram, but I usually run in galvanostatic mode.
+
+This is where you specify the rectilinear domain size for the aqueous region, and the mesh size in each dimension. Mesh refinement near the boundaries is an option here. The "LRC" variable lets you specify if you would like refinement (down to the "min" parameter) near the left boundary, right boundary, or both boundaries.
+
+![Input file sample image 1!](/inputFileImages/input_1.png "Sample input file, figure 1.")
+
+Boundary condition selection occurs here.
+
+![Input file sample image 2!](/inputFileImages/input_2.png "Sample input file, figure 2.")
 
 ## Mesh generation
+
+## Boundary conditions
 
 ## Numerical methods
 
