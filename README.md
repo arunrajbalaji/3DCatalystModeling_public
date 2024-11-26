@@ -18,7 +18,7 @@ This is a brief snapshot of parts of the code, pulled from the active research b
 
 ## What is not included
 
-Since publications related to this code have not been submitted yet, I have elected to withhold all of the post-processing and plotting components. In truth, post-processing and plotting code accounts for as much of the code in the active research repository as the actual simulation components. Additionally, several versions of the *main.m* file were used to prototype and develop different numerical methods and iteration schemes. I have only included the file for the end result of this iterative software design process.
+Since publications related to this code have not been submitted yet, I have elected to withhold all of the post-processing and plotting components. In truth, post-processing and plotting code accounts for as much of the code in the active research repository as the actual simulation components. Additionally, several versions of the *main.m* file were used to prototype and develop different numerical methods and iteration schemes. I have only included intermediate versions of the file in this publicly-accessible repository.
 
 ## Running the simulation
 
