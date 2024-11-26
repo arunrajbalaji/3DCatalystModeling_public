@@ -106,4 +106,4 @@ Many of the files have elaborate headers that list the function name, arguments,
 - Some functions are missing the headers entirely
 - Some of the headers are not udpated to reflect the code below
 
-Some functions (particularly those at the core of the numerical methods) have large lists of arguments. This situation can be avoided by using an object-oriented approach instead, combining variables into logically-grouped structures.
+Some functions (particularly those at the core of the numerical methods) have large lists of arguments. This situation can be avoided by using an object-oriented approach instead, combining variables into logically-designed objects.
