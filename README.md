@@ -10,7 +10,7 @@ This is a brief snapshot of parts of the code, pulled from the active research b
 
 - *source/*: main program files, with a wide variety of different sub-functions (including different versions that were used for experimentation with different schemes)
   - The most important file here is *main.m*, which drives the overall simulation
-  - Several separately-defined functions are required to run *main.m*, all of which may be found in this folder
+  - Several separately-defined functions are required to run *main.m*, many of which may be found in this folder
 - *MMS_files/*: files for implementation of the *Method of Manufactured Solutions*, a debugging framework in which carefully-designed forcing terms are used to guarantee an analytically known solution, permitting verifiation of the code
 - *notes/*: Notes used for documentation and tracking project progress
 - *input.json*: Input file, in JSON format. See more details below.
