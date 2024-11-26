@@ -98,3 +98,10 @@ Separate binary output files are created for the aqueous region and gaseous regi
 
 - **Please see the notes/generalNotes.txt file for details about units and definitions of input parameters**
 - The *notes/doNext.txt* file is a track record of objectives set and completed in the active research branch
+
+## Room for improvement
+
+Many of the files have elaborate headers that list the function name, arguments, outputs, and other helpful comments. This can be improved:
+
+- Some functions are missing the headers entirely
+- Some of the headers are not udpated to reflect the code below
